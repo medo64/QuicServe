@@ -1,0 +1,11 @@
+.vs/
+bin/
+build/
+dist/
+obj/
+package/
+snoops/
+tools/
+tmp/
+*.rar
+*.zip
