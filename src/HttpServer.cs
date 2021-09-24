@@ -59,8 +59,8 @@ namespace QuicServe {
         }
 
 
-        public static int PlainPort { get; } = 58080;
-        public static int SecurePort { get; } = 58443;
+        public static int PlainPort { get; } = 42080;
+        public static int SecurePort { get; } = 42443;
 
 
         private static X509Certificate2? GetCertificate() {

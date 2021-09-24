@@ -2,7 +2,7 @@ using System;
 using QuicServe;
 
 HttpServer.Start();
-Log.Info($"Web server on ports {HttpServer.PlainPort} and {HttpServer.SecurePort}");
+Log.Info($"Web server on http://127.0.0.1:{HttpServer.PlainPort} and https://127.0.0.1:{HttpServer.SecurePort}");
 
 Console.CancelKeyPress += delegate {
     HttpServer.Stop();
