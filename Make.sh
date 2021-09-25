@@ -76,7 +76,7 @@ function dist() {
         "$APP_NAME-$APP_VERSION/" || return 1
     mkdir -p "$BASE_DIRECTORY/dist/"
     mv "$DIST_DIRECTORY.tar.gz" "$BASE_DIRECTORY/dist/" || return 1
-    echo "${ANSI_CYAN}Output at 'dist/$APP_NAME-$APP_VERSION.tar.gz'${ANSI_RESET}"
+    echo "${ANSI_CYAN}Archive in 'dist/$APP_NAME-$APP_VERSION.tar.gz'${ANSI_RESET}"
     return 0
 }
 
@@ -89,7 +89,7 @@ function debug() {
                  --verbosity "minimal" \
                  || return 1
     cp "$BASE_DIRECTORY/build/debug/$APP_NAME"* "$BASE_DIRECTORY/bin/" || return 1
-    echo "${ANSI_CYAN}Output in 'bin/'${ANSI_RESET}"
+    echo "${ANSI_CYAN}Binaries in 'bin/'${ANSI_RESET}"
 }
 
 function release() {
@@ -104,7 +104,7 @@ function release() {
                  --verbosity "minimal" \
                  || return 1
     cp "$BASE_DIRECTORY/build/release/$APP_NAME"* "$BASE_DIRECTORY/bin/" || return 1
-    echo "${ANSI_CYAN}Output in 'bin/'${ANSI_RESET}"
+    echo "${ANSI_CYAN}Binaries in 'bin/'${ANSI_RESET}"
 }
 
 function publish() {
@@ -129,7 +129,46 @@ function publish() {
                    -p:DebugType=portable \
                    src/QuicServe.csproj || return 1
     cp "$BASE_DIRECTORY/build/publish/$APP_NAME"* "$BASE_DIRECTORY/bin/" || return 1
-    echo "${ANSI_CYAN}Output in 'bin/'${ANSI_RESET}"
+    echo "${ANSI_CYAN}Binaries in 'bin/'${ANSI_RESET}"
+}
+
+function certificate() {
+    if ! command -v openssl >/dev/null; then
+        echo "${ANSI_RED}No OpenSSL found!${ANSI_RESET}" >&2
+        exit 1
+    fi
+    rm -r "$BASE_DIRECTORY/build/certificate/" 2>/dev/null
+    mkdir -p "$BASE_DIRECTORY/build/certificate/"
+    openssl req -x509 -newkey ed25519 -sha256 -days 15340 -nodes \
+        -keyout "$BASE_DIRECTORY/build/certificate/$APP_NAME.key" \
+        -out "$BASE_DIRECTORY/build/certificate/$APP_NAME.crt" \
+        -subj "/CN=QuicServe" -extensions v3_ca -extensions v3_req -config <( \
+            echo '[req]'; \
+            echo 'distinguished_name=req'; \
+            echo 'x509_extension = v3_ca'; \
+            echo 'req_extensions = v3_req'; \
+            echo '[v3_req]'; \
+            echo 'basicConstraints = CA:FALSE'; \
+            echo 'keyUsage = nonRepudiation, digitalSignature, keyEncipherment'; \
+            echo 'subjectAltName = @alt_names'; \
+            echo '[ alt_names ]'; \
+            echo "DNS.1 = localhost"; \
+            echo '[ v3_ca ]'; \
+            echo 'subjectKeyIdentifier=hash'; \
+            echo 'authorityKeyIdentifier=keyid:always,issuer'; \
+            echo 'basicConstraints = critical, CA:TRUE, pathlen:0'; \
+            echo 'keyUsage = critical, cRLSign, keyCertSign'; \
+            echo 'extendedKeyUsage = serverAuth, clientAuth' \
+        ) && \
+    openssl pkcs12 -export -keypbe NONE -certpbe NONE -nomaciter -nodes -passout pass:"" \
+        -inkey "$BASE_DIRECTORY/build/certificate/$APP_NAME.key" \
+        -in "$BASE_DIRECTORY/build/certificate/$APP_NAME.crt" \
+        -out "$BASE_DIRECTORY/build/certificate/$APP_NAME.pfx" || return 1
+    openssl pkcs12 -info -in "$BASE_DIRECTORY/build/certificate/$APP_NAME.pfx" -noout -passin pass:"" || return 1
+    rm "$BASE_DIRECTORY/build/certificate/$APP_NAME.crt" "$BASE_DIRECTORY/build/certificate/$APP_NAME.key" 2>/dev/null
+    mkdir -p "$BASE_DIRECTORY/bin/"
+    cp "$BASE_DIRECTORY/build/certificate/$APP_NAME.pfx"* "$BASE_DIRECTORY/bin/" || return 1
+    echo "${ANSI_CYAN}Certificate in 'bin/$APP_NAME.pfx'${ANSI_RESET}"
 }
 
 function test() {
@@ -149,14 +188,15 @@ APP_VERSION=`cat "$BASE_DIRECTORY/src/QuicServe.csproj" | grep "<Version>" | sed
 while [ $# -gt 0 ]; do
     OPERATION="$1"
     case "$OPERATION" in
-        all)        clean || break ;;
-        clean)      clean || break ;;
-        debug)      debug || break ;;
-        release)    release || break ;;
-        publish)    publish || break ;;
-        test)       test || break ;;
-        distclean)  distclean || break ;;
-        dist)       dist || break ;;
+        all)         clean || break ;;
+        clean)       clean || break ;;
+        debug)       debug || break ;;
+        release)     release || break ;;
+        publish)     publish || break ;;
+        certificate) certificate || break ;;
+        test)        test || break ;;
+        distclean)   distclean || break ;;
+        dist)        dist || break ;;
 
         *)  echo "${ANSI_RED}Unknown operation '$OPERATION'!${ANSI_RESET}" >&2 ; exit 1 ;;
     esac

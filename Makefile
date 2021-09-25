@@ -1,4 +1,4 @@
-.PHONY: all clean debug release publish test distclean dist
+.PHONY: all clean debug release publish certificate test distclean dist
 
 all: release
 
@@ -13,6 +13,9 @@ release: clean
 
 publish: clean
 	@./Make.sh publish
+
+certificate:
+	@./Make.sh certificate
 
 test:
 	@./Make.sh test
