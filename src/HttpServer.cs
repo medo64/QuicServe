@@ -31,8 +31,10 @@ namespace QuicServe {
                         options.Listen(IPAddress.Any, SecurePort, listenOptions => {
                             listenOptions.Protocols = HttpProtocols.Http1AndHttp2AndHttp3;
                             if (cert != null) {
+                                Log.Debug($"Using certificate {cert.SubjectName.Name} ({cert.SerialNumber})");
                                 listenOptions.UseHttps(cert);
                             } else {
+                                Log.Debug($"Using default certificate");
                                 listenOptions.UseHttps();
                             }
                         });
@@ -67,9 +69,9 @@ namespace QuicServe {
             var certFilename = Path.Combine(AppContext.BaseDirectory, "quicserve.pfx");
             if (File.Exists(certFilename)) {
                 try {
-                    return new X509Certificate2(certFilename, "");
+                    return new X509Certificate2(certFilename);
                 } catch (CryptographicException ex) {
-                    Log.Warning("Cannot load certificate; using default", ex);
+                    Log.Warning($"Cannot load certificate {certFilename}", ex);
                 }
             }
             return null;
