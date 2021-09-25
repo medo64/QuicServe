@@ -88,8 +88,7 @@ function debug() {
                  --output "$BASE_DIRECTORY/build/debug/" \
                  --verbosity "minimal" \
                  || return 1
-    cp "$BASE_DIRECTORY/build/debug/QuicServe.dll" "$BASE_DIRECTORY/bin/" || return 1
-    cp "$BASE_DIRECTORY/build/debug/QuicServe.pdb" "$BASE_DIRECTORY/bin/" || return 1
+    cp "$BASE_DIRECTORY/build/debug/$APP_NAME"* "$BASE_DIRECTORY/bin/" || return 1
     echo "${ANSI_CYAN}Output in 'bin/'${ANSI_RESET}"
 }
 
@@ -104,8 +103,7 @@ function release() {
                  --output "$BASE_DIRECTORY/build/release/" \
                  --verbosity "minimal" \
                  || return 1
-    cp "$BASE_DIRECTORY/build/release/QuicServe.dll" "$BASE_DIRECTORY/bin/" || return 1
-    cp "$BASE_DIRECTORY/build/release/QuicServe.pdb" "$BASE_DIRECTORY/bin/" || return 1
+    cp "$BASE_DIRECTORY/build/release/$APP_NAME"* "$BASE_DIRECTORY/bin/" || return 1
     echo "${ANSI_CYAN}Output in 'bin/'${ANSI_RESET}"
 }
 
@@ -130,7 +128,7 @@ function publish() {
                    -p:PublishSingleFile=true \
                    -p:DebugType=portable \
                    src/QuicServe.csproj || return 1
-    cp "$BASE_DIRECTORY/build/publish/"$APP_NAME* "$BASE_DIRECTORY/bin/" || return 1
+    cp "$BASE_DIRECTORY/build/publish/$APP_NAME"* "$BASE_DIRECTORY/bin/" || return 1
     echo "${ANSI_CYAN}Output in 'bin/'${ANSI_RESET}"
 }
 
@@ -155,8 +153,8 @@ while [ $# -gt 0 ]; do
         clean)      clean || break ;;
         debug)      debug || break ;;
         release)    release || break ;;
+        publish)    publish || break ;;
         test)       test || break ;;
-        publish)       publish || break ;;
         distclean)  distclean || break ;;
         dist)       dist || break ;;
 
