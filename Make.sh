@@ -139,7 +139,7 @@ function certificate() {
     fi
     rm -r "$BASE_DIRECTORY/build/certificate/" 2>/dev/null
     mkdir -p "$BASE_DIRECTORY/build/certificate/"
-    openssl req -x509 -newkey ed25519 -sha256 -days 15340 -nodes \
+    openssl req -x509 -newkey rsa -sha256 -days 15340 -nodes \
         -keyout "$BASE_DIRECTORY/build/certificate/$APP_NAME.key" \
         -out "$BASE_DIRECTORY/build/certificate/$APP_NAME.crt" \
         -subj "/CN=QuicServe" -extensions v3_ca -extensions v3_req -config <( \
