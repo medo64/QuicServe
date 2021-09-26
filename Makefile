@@ -5,13 +5,13 @@ all: release
 clean:
 	@./Make.sh clean
 
-debug: clean
+debug:
 	@./Make.sh debug
 
-release: clean
+release:
 	@./Make.sh release
 
-publish: clean
+publish:
 	@./Make.sh publish
 
 certificate:
@@ -23,5 +23,5 @@ test:
 distclean:
 	@./Make.sh distclean
 
-dist: distclean
+dist:
 	@./Make.sh dist
