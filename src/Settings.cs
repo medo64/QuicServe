@@ -26,7 +26,7 @@ namespace QuicServe {
         public static int PlainPort {
             get {
                 var port = Config().Read("", "PlainPort", 42080);
-                if ((port < 1) || (port > 65535)) { port = 42080; }
+                if ((port < 0) || (port > 65535)) { port = 42080; }
                 return port;
             }
         }
@@ -34,7 +34,7 @@ namespace QuicServe {
         public static int SecurePort {
             get {
                 var port = Config().Read("", "SecurePort", 42443);
-                if ((port < 1) || (port > 65535)) { port = 42443; }
+                if ((port < 0) || (port > 65535)) { port = 42443; }
                 return port;
             }
         }

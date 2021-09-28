@@ -58,6 +58,37 @@ namespace QuicServe {
         }
 
 
+        public static void Startup() {
+            var plainPort = Settings.PlainPort;
+            var securePort = Settings.SecurePort;
+            lock (ConsoleSync) {
+                if ((plainPort > 0) && (securePort > 0)) {
+                    Console.Write("Web server on ");
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.Write($"http://127.0.0.1:{plainPort}");
+                    Console.ResetColor();
+                    Console.Write(" and ");
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.Write($"https://127.0.0.1:{securePort}");
+                    Console.ResetColor();
+                } else if (plainPort > 0) {
+                    Console.Write("Web server on ");
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.Write($"http://127.0.0.1:{plainPort}");
+                    Console.ResetColor();
+                } else if (securePort > 0) {
+                    Console.Write("Web server on ");
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.Write($"https://127.0.0.1:{securePort}");
+                    Console.ResetColor();
+                } else {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.Write("Web server not listening");
+                }
+                Console.WriteLine();
+            }
+        }
+
         public static async Task Request(HttpRequest request) {
             var headerLines = new List<string>();
             foreach (var header in request.Headers) {
