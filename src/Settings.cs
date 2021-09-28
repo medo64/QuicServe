@@ -11,12 +11,13 @@ namespace QuicServe {
         private static IniFile Config() {
             lock (SyncRoot) {
                 if (CachedConfig == null) {
-                    var iniPath = Path.Combine(AppContext.BaseDirectory, "QuicServe.ini");
-                    try {
-                        CachedConfig = new IniFile(iniPath);
-                    } catch(IOException) {
-                        CachedConfig = new IniFile();  // just give it an empty file
+                    var iniPath = Helper.GetFilePath("QuicServe.ini");
+                    if (iniPath != null) {
+                        try {
+                            CachedConfig = new IniFile(Path.Combine(AppContext.BaseDirectory, iniPath));
+                        } catch(IOException) { }
                     }
+                    if (CachedConfig == null) { CachedConfig = new IniFile(); }  // just give it an empty file
                 }
                 return CachedConfig;
             }
