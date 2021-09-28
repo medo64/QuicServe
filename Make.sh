@@ -34,7 +34,13 @@ while getopts ":h" OPT; do
     esac
 done
 
-if ! command -v dotnet >/dev/null; then
+if [[ -f ~/dotnet/dotnet ]]; then
+    DOTNET_CMD=~/dotnet/dotnet
+else
+    DOTNET_CMD=dotnet
+fi
+
+if ! command -v $DOTNET_CMD >/dev/null; then
     echo "${ANSI_RED}No dotnet found!${ANSI_RESET}" >&2
     exit 1
 fi
@@ -83,11 +89,10 @@ function dist() {
 function debug() {
     mkdir -p "$BASE_DIRECTORY/bin/"
     mkdir -p "$BASE_DIRECTORY/build/debug/"
-    dotnet build "$BASE_DIRECTORY/src/QuicServe.sln" \
-                 --configuration "Debug" \
-                 --output "$BASE_DIRECTORY/build/debug/" \
-                 --verbosity "minimal" \
-                 || return 1
+    $DOTNET_CMD build --configuration "Debug" \
+                      --output "$BASE_DIRECTORY/build/debug/" \
+                      --verbosity "minimal" \
+                      "$BASE_DIRECTORY/src/QuicServe.sln" || return 1
     cp "$BASE_DIRECTORY/build/debug/$APP_NAME"* "$BASE_DIRECTORY/bin/" || return 1
     echo "${ANSI_CYAN}Binaries in 'bin/'${ANSI_RESET}"
 }
@@ -98,11 +103,10 @@ function release() {
     fi
     mkdir -p "$BASE_DIRECTORY/bin/"
     mkdir -p "$BASE_DIRECTORY/build/release/"
-    dotnet build "$BASE_DIRECTORY/src/QuicServe.sln" \
-                 --configuration "Release" \
-                 --output "$BASE_DIRECTORY/build/release/" \
-                 --verbosity "minimal" \
-                 || return 1
+    $DOTNET_CMD build --configuration "Release" \
+                      --output "$BASE_DIRECTORY/build/release/" \
+                      --verbosity "minimal" \
+                      "$BASE_DIRECTORY/src/QuicServe.sln" || return 1
     cp "$BASE_DIRECTORY/build/release/$APP_NAME"* "$BASE_DIRECTORY/bin/" || return 1
     echo "${ANSI_CYAN}Binaries in 'bin/'${ANSI_RESET}"
 }
@@ -118,16 +122,16 @@ function publish() {
     fi
     mkdir -p "$BASE_DIRECTORY/bin/"
     mkdir -p "$BASE_DIRECTORY/build/publish/"
-    dotnet publish --force \
-                   --configuration "Release" \
-                   --output "$BASE_DIRECTORY/build/publish/" \
-                   --self-contained true \
-                   --runtime $PLATFORM \
-                   -p:Deterministic=true \
-                   -p:Optimize=true \
-                   -p:PublishSingleFile=true \
-                   -p:DebugType=portable \
-                   src/QuicServe.csproj || return 1
+    $DOTNET_CMD publish --configuration "Release" \
+                        --force \
+                        --output "$BASE_DIRECTORY/build/publish/" \
+                        --self-contained true \
+                        --runtime $PLATFORM \
+                        -p:Deterministic=true \
+                        -p:Optimize=true \
+                        -p:PublishSingleFile=true \
+                        -p:DebugType=portable \
+                        "$BASE_DIRECTORY/src/QuicServe.csproj" || return 1
     cp "$BASE_DIRECTORY/build/publish/$APP_NAME"* "$BASE_DIRECTORY/bin/" || return 1
     echo "${ANSI_CYAN}Binaries in 'bin/'${ANSI_RESET}"
 }
@@ -174,11 +178,10 @@ function certificate() {
 function test() {
     mkdir -p "$BASE_DIRECTORY/build/test/"
     echo ".NET `dotnet --version`"
-    dotnet test "$BASE_DIRECTORY/src/QuicServe.sln" \
-                --configuration "Debug" \
-                --output "$BASE_DIRECTORY/build/test/" \
-                --verbosity "minimal" \
-                || return 1
+    $DOTNET_CMD test --configuration "Debug" \
+                     --output "$BASE_DIRECTORY/build/test/" \
+                     --verbosity "minimal" \
+                     "$BASE_DIRECTORY/src/QuicServe.sln" || return 1
 }
 
 
