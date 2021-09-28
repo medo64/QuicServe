@@ -23,12 +23,12 @@ namespace QuicServe {
                 .ConfigureWebHostDefaults(webBuilder => {
                     webBuilder.UseStartup<Startup>();
                     webBuilder.ConfigureKestrel(options => {
-                        options.Listen(IPAddress.Any, PlainPort, listenOptions => {
+                        options.Listen(IPAddress.Any, Settings.PlainPort, listenOptions => {
                             listenOptions.Protocols = HttpProtocols.Http1AndHttp2AndHttp3;
                         });
 
                         var cert = GetCertificate();
-                        options.Listen(IPAddress.Any, SecurePort, listenOptions => {
+                        options.Listen(IPAddress.Any, Settings.SecurePort, listenOptions => {
                             listenOptions.Protocols = HttpProtocols.Http1AndHttp2AndHttp3;
                             if (cert != null) {
                                 Log.Debug($"Using certificate {cert.SubjectName.Name} ({cert.SerialNumber})");
@@ -59,10 +59,6 @@ namespace QuicServe {
                 Builder = null;
             }
         }
-
-
-        public static int PlainPort { get; } = 42080;
-        public static int SecurePort { get; } = 42443;
 
 
         private static X509Certificate2? GetCertificate() {
