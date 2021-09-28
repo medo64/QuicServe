@@ -11,8 +11,12 @@ namespace QuicServe {
         private static IniFile Config() {
             lock (SyncRoot) {
                 if (CachedConfig == null) {
-                    var path = Path.Combine(AppContext.BaseDirectory, "QuicServe.ini");
-                    CachedConfig = new IniFile(path);
+                    var iniPath = Path.Combine(AppContext.BaseDirectory, "QuicServe.ini");
+                    try {
+                        CachedConfig = new IniFile(iniPath);
+                    } catch(IOException) {
+                        CachedConfig = new IniFile();  // just give it an empty file
+                    }
                 }
                 return CachedConfig;
             }
@@ -29,8 +33,8 @@ namespace QuicServe {
 
         public static int SecurePort {
             get {
-                var port = Config().Read("", "SecurePort", 42080);
-                if ((port < 1) || (port > 65535)) { port = 42080; }
+                var port = Config().Read("", "SecurePort", 42443);
+                if ((port < 1) || (port > 65535)) { port = 42443; }
                 return port;
             }
         }
