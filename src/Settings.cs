@@ -8,10 +8,10 @@ namespace QuicServe {
         private static readonly object SyncRoot = new();
         private static IniFile? CachedConfig;
 
-        private static IniFile Config() {
+        public static IniFile Config() {
             lock (SyncRoot) {
                 if (CachedConfig == null) {
-                    var iniPath = Helper.GetFilePath("QuicServe.ini");
+                    var iniPath = Helper.GetFullFilePath("QuicServe.ini");
                     if (iniPath != null) {
                         try {
                             CachedConfig = new IniFile(Path.Combine(AppContext.BaseDirectory, iniPath));

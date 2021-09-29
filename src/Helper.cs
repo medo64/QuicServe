@@ -1,11 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text.RegularExpressions;
 
 namespace QuicServe {
     internal static class Helper {
 
-        public static string? GetFilePath(string relativeFilePath) {  // gets case-insensitive path from relative path
+        public static string? GetFullFilePath(string relativeFilePath) {  // gets case-insensitive path from relative path
             var pathParts = new Queue<string>(relativeFilePath.Split(new char[] { '/' }, StringSplitOptions.RemoveEmptyEntries));
 
             var currDirectory = new DirectoryInfo(AppContext.BaseDirectory);
@@ -14,7 +15,6 @@ namespace QuicServe {
 
                 DirectoryInfo? directoryCandidate = null;
                 foreach (var directory in currDirectory.EnumerateDirectories()) {
-                    Log.Debug(directory.Name);
                     if (directory.Name.Equals(pathPart, StringComparison.InvariantCulture)) {
                         directoryCandidate = directory;
                         break;  // if exact match is found, we're done
@@ -46,6 +46,18 @@ namespace QuicServe {
             }
 
             return null;
+        }
+
+        private static readonly Dictionary<string, Regex> GlobRegexCache = new();
+        public static bool IsGlobMatch(string glob, string text) {
+            if (glob == "") { return false; }
+
+            if (!GlobRegexCache.TryGetValue(glob, out var regex)) {
+                var pattern = "^" + Regex.Escape(glob).Replace(@"\*", ".*").Replace(@"\?", ".") + "$";
+                regex = new Regex(pattern, RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.Singleline);
+                GlobRegexCache.Add(glob, regex);
+            }
+            return regex.IsMatch(text);
         }
 
     }

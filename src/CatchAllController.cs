@@ -13,21 +13,24 @@ namespace QuicServe.Controllers {
         [HttpGet()]
         public async Task<IActionResult> Get() {
             await Log.Request(Request);
-            var reqPath = Request.Path.Value?.TrimStart('/');
+            var path = new PathSettings(Request.Path.Value);
 
-            if (!string.IsNullOrEmpty(reqPath)) {
-                var filePath = Helper.GetFilePath(reqPath);
-                if (filePath != null) {
-                    if (System.IO.File.Exists(filePath)) {
-                        if (!ContentTypeProvider.TryGetContentType(filePath, out var contentType)) {
-                            contentType= "application/octet-stream";
+            if (path.StatusCode != 0) {  // if status code is specified, use that
+                return new StatusCodeResult(path.StatusCode);
+            } else {  // try getting the file
+                if (!string.IsNullOrEmpty(path.FilePath)) {
+                    var filePath = Helper.GetFullFilePath(path.FilePath);
+                    if (filePath != null) {
+                        if (System.IO.File.Exists(filePath)) {
+                            if (!ContentTypeProvider.TryGetContentType(filePath, out var contentType)) {
+                                contentType = "application/octet-stream";
+                            }
+                            var bytes = await System.IO.File.ReadAllBytesAsync(filePath);
+                            return new FileContentResult(bytes, contentType);
                         }
-                        var bytes = await System.IO.File.ReadAllBytesAsync(filePath);
-                        return new FileContentResult(bytes, contentType);
                     }
                 }
             }
-
             return Ok();
         }
 
