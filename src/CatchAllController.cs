@@ -16,7 +16,7 @@ namespace QuicServe.Controllers {
             var path = new PathSettings(Request.Path.Value);
 
             if (path.StatusCode != 0) {  // if status code is specified, use that
-                return new StatusCodeResult(path.StatusCode);
+                return new HttpResult(path.StatusCode);
             } else {  // try getting the file
                 if (!string.IsNullOrEmpty(path.FilePath)) {
                     var filePath = Helper.GetFullFilePath(path.FilePath);
