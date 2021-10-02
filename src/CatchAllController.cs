@@ -15,23 +15,17 @@ namespace QuicServe.Controllers {
             await Log.Request(Request);
             var path = new PathSettings(Request.Path.Value);
 
-            if (path.StatusCode != 0) {  // if status code is specified, use that
-                return new HttpResult(path.StatusCode);
-            } else {  // try getting the file
-                if (!string.IsNullOrEmpty(path.FilePath)) {
-                    var filePath = Helper.GetFullFilePath(path.FilePath);
-                    if (filePath != null) {
-                        if (System.IO.File.Exists(filePath)) {
-                            if (!ContentTypeProvider.TryGetContentType(filePath, out var contentType)) {
-                                contentType = "application/octet-stream";
-                            }
-                            var bytes = await System.IO.File.ReadAllBytesAsync(filePath);
-                            return new FileContentResult(bytes, contentType);
-                        }
+            var filePath = Helper.GetFullFilePath(path.RelativePath);
+            if (filePath != null) {
+                if (System.IO.File.Exists(filePath)) {
+                    if (!ContentTypeProvider.TryGetContentType(filePath, out var contentType)) {
+                        contentType = "application/octet-stream";
                     }
+                    var bytes = await System.IO.File.ReadAllBytesAsync(filePath);
+                    return new HttpResult(path.StatusCode, contentType, bytes);
                 }
             }
-            return Ok();
+            return new HttpResult(path.StatusCode);
         }
 
         [HttpDelete()]
